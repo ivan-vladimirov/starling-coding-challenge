@@ -35,7 +35,7 @@ public class AccountController {
         return accountService.getTransactions(fromDate);
     }
     @GetMapping("/roundUpWeek")
-    public Map<String, BigDecimal> roundMeUp(){
+    public List<Map<String, BigDecimal>> roundMeUp(){
          return roundingService.roundUpTransactions();
     }
 }

@@ -15,9 +15,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RoundingService {
@@ -29,22 +28,29 @@ public class RoundingService {
         this.client = client;
     }
 
-    public Map<String,BigDecimal> roundUpTransactions() {
-        Map<String,BigDecimal> roundUps = new HashMap<>();
-        List<TransactionsResponse> transactionsResponses = client.getTransactions(ZonedDateTime.parse(ZonedDateTime.now().minusDays(7).format(DateTimeFormatter.ISO_DATE_TIME)));
-        transactionsResponses.forEach(transactionsResponse -> roundUps.put(
-                transactionsResponse.getFeedItems().get(0).getAmount().getCurrency(),
-                calculateRoundUps(transactionsResponse.getFeedItems()))
+    public List<Map<String,BigDecimal>> roundUpTransactions() {
+        List<Map<String,BigDecimal>> roundUps = new ArrayList<>();
+        List<TransactionsResponse> transactionsResponses = client.
+                getTransactions(ZonedDateTime.parse(ZonedDateTime.now().minusDays(7).format(DateTimeFormatter.ISO_DATE_TIME)));
+        transactionsResponses.forEach(transactionsResponse -> roundUps.add(calculateRoundUps(transactionsResponse.getFeedItems()))
         );
         return roundUps;
     }
 
-    public BigDecimal calculateRoundUps(final List<FeedItem> feedItems) {
-        return feedItems.stream()
+    public Map<String,BigDecimal> calculateRoundUps(final List<FeedItem> feedItems) {
+        Map<String,BigDecimal> result = new HashMap<>();
+        feedItems.stream()
                 .filter(e -> e.getDirection() == Direction.OUT)
-                .map(FeedItem::getAmount)
-                .map(Amount::getMinorUnits)
-                .reduce(BigDecimal.ZERO, (bigDecimal, amount) -> bigDecimal.add(this.roundUpItem(amount)));
+                .map(FeedItem::getAmount).forEach( item -> {
+                    if (result.get(item.getCurrency()) == null) {
+                        result.put(item.getCurrency(), this.roundUpItem(item.getMinorUnits()));
+                    } else {
+                        result.put(item.getCurrency(), result.get(item.getCurrency()).add(this.roundUpItem(item.getMinorUnits())));
+                    }
+                });
+
+        return result;
+
     }
 
     private BigDecimal roundUpItem(final BigDecimal item) {

@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -72,7 +73,7 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(0.65), roundingService.roundUpTransactions().get("GBP"));
+        assertEquals(BigDecimal.valueOf(0.65), roundingService.roundUpTransactions().get(0).get("GBP"));
     }
 
     @Test
@@ -98,7 +99,7 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(1.67), roundingService.roundUpTransactions().get("GBP"));
+        assertEquals(BigDecimal.valueOf(1.67), roundingService.roundUpTransactions().get(0).get("GBP"));
     }
     @Test
     void testRoundingForTransactionsWithAllInDirection(){
@@ -123,7 +124,7 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(0), roundingService.roundUpTransactions().get("GBP"));
+        assertNull(roundingService.roundUpTransactions().get(0).get("GBP"));
     }
     @Test
     void testRoundingWithTranasctionsProvidedByStarling(){
@@ -148,6 +149,33 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(1.58), roundingService.roundUpTransactions().get("GBP"));
+        assertEquals(BigDecimal.valueOf(1.58), roundingService.roundUpTransactions().get(0).get("GBP"));
+    }
+
+    @Test
+    void testRoundingWithDifferentCurrencies(){
+        TransactionsResponse ts = new TransactionsResponse();
+
+        FeedItem fi1 = new FeedItem();
+        fi1.setDirection(Direction.OUT);
+        fi1.setAmount(new Amount("GBP", BigDecimal.valueOf(435)));
+        FeedItem fi2 = new FeedItem();
+        fi2.setDirection(Direction.OUT);
+        fi2.setAmount(new Amount("EUR", BigDecimal.valueOf(520)));
+        FeedItem fi3 = new FeedItem();
+        fi3.setDirection(Direction.OUT);
+        fi3.setAmount(new Amount("GBP", BigDecimal.valueOf(87)));
+
+        List<FeedItem> feedItems = new ArrayList<>();
+        feedItems.add(fi1);
+        feedItems.add(fi2);
+        feedItems.add(fi3);
+
+        ts.setFeedItems(feedItems);
+
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
+                .thenReturn(ts);
+        assertEquals(BigDecimal.valueOf(0.78), roundingService.roundUpTransactions().get(0).get("GBP"));
+        assertEquals(BigDecimal.valueOf(0.80), roundingService.roundUpTransactions().get(0).get("EUR"));
     }
 }
