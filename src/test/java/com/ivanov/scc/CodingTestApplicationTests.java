@@ -1,4 +1,4 @@
-package com.ivanov.codingtest;
+package com.ivanov.scc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -8,6 +8,7 @@ class CodingTestApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }
