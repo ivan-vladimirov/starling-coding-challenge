@@ -47,21 +47,29 @@ public class StarlingClient {
 
     }
 
-    public List<Object> getTransactions(ZonedDateTime fromDate){
+    public List<TransactionsResponse> getTransactions(ZonedDateTime fromDate){
         List<Account> accounts = getAllAccounts().getAccounts();
         if(accounts == null || accounts.isEmpty()){
             LOG.error("No accounts to retrieve transactions from.");
             return null;
         }
-        List<Object> transactions = new ArrayList<>();
+        List<TransactionsResponse> transactions = new ArrayList<>();
 
-        accounts.stream().forEach( account -> {
-                    transactions.add(httpClient.sendGetWithJsonResponse(
-                            String.format(GET_TRANSACTIONS,
-                                    account.getAccountUid(),
-                                    account.getDefaultCategory(),
-                                    DateTimeFormatter.ISO_DATE_TIME.format(fromDate)),
-                            TransactionsResponse.class));
+        accounts.forEach( account -> {
+            try{
+                transactions.add(httpClient.sendGetWithJsonResponse(
+                        String.format(GET_TRANSACTIONS,
+                                account.getAccountUid(),
+                                account.getDefaultCategory(),
+                                fromDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"))),
+                        TransactionsResponse.class));
+            }catch (HttpNoOkResponse e){
+                if (e.getCode() == HttpCode.NOT_FOUND){
+                    throw new AccountsNotFoundException("Transactions not found for current user.");
+                }
+                throw e;
+            }
+
         });
 
         return transactions;

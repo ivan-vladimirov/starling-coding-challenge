@@ -28,11 +28,11 @@ public class FeedItem {
         this.direction = direction;
     }
 
-    public Amount getAmmount() {
+    public Amount getAmount() {
         return amount;
     }
 
-    public void setAmmount(Amount ammount) {
+    public void setAmount(Amount ammount) {
         this.amount = ammount;
     }
 }

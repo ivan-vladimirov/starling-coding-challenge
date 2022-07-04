@@ -1,6 +1,5 @@
 package com.ivanov.scc;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.ivanov.scc.client.StarlingClient;
 import com.ivanov.scc.client.response.AccountResponse;
 import com.ivanov.scc.client.response.TransactionsResponse;
@@ -8,7 +7,6 @@ import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpNoOkResponse;
 import com.ivanov.scc.exception.AccountsNotFoundException;
 import com.ivanov.scc.model.Account;
-import com.ivanov.scc.model.FeedItem;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +25,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -46,9 +43,7 @@ public class StarlingClientTest {
     void testGetAccountsNotFound(){
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(AccountResponse.class)))
                 .thenThrow(new HttpNoOkResponse("REQ", "RESP", HttpStatus.SC_NOT_FOUND));
-        AccountsNotFoundException e = assertThrows(AccountsNotFoundException.class, () -> {
-            starlingClient.getAllAccounts();
-        });
+        AccountsNotFoundException e = assertThrows(AccountsNotFoundException.class, () -> starlingClient.getAllAccounts());
         assertEquals("Accounts not found for current user.", e.getMessage());
     }
 
@@ -75,7 +70,7 @@ public class StarlingClientTest {
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
                 .thenReturn(new TransactionsResponse());
         ZonedDateTime lt = ZonedDateTime.now();
-        List<Object> transactions = starlingClient.getTransactions(lt);
+        List<TransactionsResponse> transactions = starlingClient.getTransactions(lt);
 
         assertNotNull(transactions);
     }
