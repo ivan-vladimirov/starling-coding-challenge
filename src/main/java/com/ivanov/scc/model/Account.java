@@ -4,12 +4,6 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class Account {
-//    "accountUid": "8b31444e-92cd-4a1f-893a-15a3c3a8f35a",
-//            "accountType": "PRIMARY",
-//            "defaultCategory": "54c3f526-5ebb-461f-9d19-0078a08b75cd",
-//            "currency": "GBP",
-//            "createdAt": "2022-07-04T08:45:27.031Z",
-//            "name": "Personal"
     private String accountUid;
     private AccountType accountType;
     private String defaultCategory;
