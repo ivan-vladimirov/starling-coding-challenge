@@ -26,7 +26,7 @@ public class StarlingClient {
     private final static String GET_ACCOUNTS = "/api/v2/accounts";
     private final static String GET_TRANSACTIONS = "/api/v2/feed/account/%s/" +
             "category/%s?changesSince=%s";
-    private final static String GET_SAVING_GOALS = "api/v2/account/%s/savings-goals";
+    private final static String GET_SAVING_GOALS = "/api/v2/account/%s/savings-goals";
     private final HttpClient httpClient;
     @Autowired
     public StarlingClient(@Qualifier("starling-api") HttpClient httpClient){
@@ -52,7 +52,7 @@ public class StarlingClient {
         List<SavingGoalsResponse> savingGoalsResponses = new ArrayList<>();
         accounts.forEach(account -> {
             try{
-                savingGoalsResponses.add(httpClient.sendGetWithJsonResponse(GET_SAVING_GOALS, SavingGoalsResponse.class));
+                savingGoalsResponses.add(httpClient.sendGetWithJsonResponse( String.format(GET_SAVING_GOALS,account.getAccountUid()), SavingGoalsResponse.class));
             } catch (HttpNoOkResponse e) {
                 if (e.getCode() == HttpCode.NOT_FOUND){
                     throw new AccountsNotFoundException("Saving Goals not found for current user.");

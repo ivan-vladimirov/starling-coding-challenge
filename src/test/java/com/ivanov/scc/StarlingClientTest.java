@@ -2,11 +2,14 @@ package com.ivanov.scc;
 
 import com.ivanov.scc.client.StarlingClient;
 import com.ivanov.scc.client.response.AccountResponse;
+import com.ivanov.scc.client.response.SavingGoalsResponse;
 import com.ivanov.scc.client.response.TransactionsResponse;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpNoOkResponse;
 import com.ivanov.scc.exception.AccountsNotFoundException;
 import com.ivanov.scc.model.Account;
+import com.ivanov.scc.model.SavingGoal;
+import com.ivanov.scc.model.TotalSaved;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,5 +77,32 @@ public class StarlingClientTest {
         List<TransactionsResponse> transactions = starlingClient.getTransactions(lt);
 
         assertNotNull(transactions);
+    }
+    @Test
+    void testGetSavingGoals(){
+        Account acc = new Account();
+        List<Account> accounts = new ArrayList<>();
+        accounts.add(acc);
+
+        AccountResponse accountResponse = new AccountResponse();
+        accountResponse.setAccounts(accounts);
+
+        SavingGoalsResponse savingGoalsResponse = new SavingGoalsResponse();
+        List<SavingGoal> savingGoals = new ArrayList<>();
+        SavingGoal sg = new SavingGoal();
+        TotalSaved ts = new TotalSaved();
+        ts.setCurrency("GBP");
+        ts.setMinorUnits(BigDecimal.valueOf(150000));
+        sg.setTotalSaved(ts);
+        savingGoals.add(sg);
+        savingGoalsResponse.setSavingGoal(savingGoals);
+
+        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(AccountResponse.class)))
+                .thenReturn(accountResponse);
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(SavingGoalsResponse.class)))
+                .thenReturn(savingGoalsResponse);
+        List<SavingGoalsResponse> savings = starlingClient.getAllSavingGoals();
+
+        assertEquals(BigDecimal.valueOf(150000),savings.get(0).getSavingGoal().get(0).getTotalSaved().getMinorUnits());
     }
 }

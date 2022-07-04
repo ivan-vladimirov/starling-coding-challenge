@@ -11,4 +11,12 @@ import java.util.List;
 public class SavingGoalsResponse {
     @JsonProperty("savingsGoalList")
     private List<SavingGoal> savingGoal;
+
+    public List<SavingGoal> getSavingGoal() {
+        return savingGoal;
+    }
+
+    public void setSavingGoal(List<SavingGoal> savingGoal) {
+        this.savingGoal = savingGoal;
+    }
 }

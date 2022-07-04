@@ -2,6 +2,7 @@ package com.ivanov.scc.controller;
 
 import com.ivanov.scc.client.response.AccountResponse;
 import com.ivanov.scc.client.StarlingClient;
+import com.ivanov.scc.client.response.SavingGoalsResponse;
 import com.ivanov.scc.client.response.TransactionsResponse;
 import com.ivanov.scc.service.RoundingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,5 +38,9 @@ public class AccountController {
     @GetMapping("/roundUpWeek")
     public List<Map<String, BigDecimal>> roundMeUp(){
          return roundingService.roundUpTransactions();
+    }
+    @GetMapping("/getSavingGoals")
+    public List<SavingGoalsResponse> getAllSavingGoals(){
+        return accountService.getAllSavingGoals();
     }
 }
