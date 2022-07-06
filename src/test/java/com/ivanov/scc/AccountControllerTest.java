@@ -84,7 +84,7 @@ public class AccountControllerTest {
     void testRoundUpWeekPut(){
         Amount amount = new Amount("TST", BigDecimal.valueOf(50.5));
         PutMoneyResponse pmr = new PutMoneyResponse();
-        when(starlingClient.putMoneyToSavingGoal(eq("test"), eq("test"), any())).thenReturn(pmr);
+        when(starlingClient.putMoneyToSavingsGoal(eq("test"), eq("test"), any())).thenReturn(pmr);
         assertEquals(pmr,accountController.roundMeUpAndPutInSaving("test","test"));
     }
 }

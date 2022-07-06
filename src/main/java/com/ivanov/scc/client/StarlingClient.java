@@ -2,7 +2,6 @@ package com.ivanov.scc.client;
 
 import com.ivanov.scc.client.request.SavingGoalPutRequest;
 import com.ivanov.scc.client.response.PutMoneyResponse;
-import com.ivanov.scc.client.response.SavingGoalsResponse;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpCode;
 import com.ivanov.scc.config.HttpNoOkResponse;
@@ -18,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -51,6 +49,7 @@ public class StarlingClient {
             throw e;
         }
     }
+
     public Account getAccountForId(String uid) {
         try {
             return httpClient.sendGetWithJsonResponse(GET_ACCOUNTS, Accounts.class)
@@ -66,27 +65,8 @@ public class StarlingClient {
             throw e;
         }
     }
-    public List<SavingGoalsResponse> getAllSavingGoals() {
-        List<Account> accounts = getAllAccounts().getAccounts();
-        if (accounts == null || accounts.isEmpty()) {
-            LOG.error("No accounts to retrieve transactions from.");
-            return null;
-        }
-        List<SavingGoalsResponse> savingGoalsResponses = new ArrayList<>();
-        accounts.forEach(account -> {
-            try {
-                savingGoalsResponses.add(httpClient.sendGetWithJsonResponse(String.format(GET_SAVING_GOALS, account.getAccountUid()), SavingGoalsResponse.class));
-            } catch (HttpNoOkResponse e) {
-                if (e.getCode() == HttpCode.NOT_FOUND) {
-                    throw new AccountsNotFoundException("Saving Goals not found for current user.");
-                }
-                throw e;
-            }
-        });
-        return savingGoalsResponses;
-    }
 
-    public PutMoneyResponse putMoneyToSavingGoal(String savingGoalUid, String accountUid, Amount amount) {
+    public PutMoneyResponse putMoneyToSavingsGoal(String savingGoalUid, String accountUid, Amount amount) {
 
         SavingGoalPutRequest savingGoalPutRequest = new SavingGoalPutRequest();
         savingGoalPutRequest.setAmount(amount);
@@ -95,9 +75,9 @@ public class StarlingClient {
                 accountUid, savingGoalUid, UUID.randomUUID()), savingGoalPutRequest, PutMoneyResponse.class);
     }
 
-    public List<Transactions> getAllTransactionsForAllAccounts(ZonedDateTime fromDate){
+    public List<Transactions> getAllTransactionsForAllAccounts(ZonedDateTime fromDate) {
         List<Account> accounts = getAllAccounts().getAccounts();
-        List<Transactions>  transactionsAllAccounts = new ArrayList<>();
+        List<Transactions> transactionsAllAccounts = new ArrayList<>();
         if (accounts == null || accounts.isEmpty()) {
             LOG.error("No account to retrieve transactions from.");
             return null;

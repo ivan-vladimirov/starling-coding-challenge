@@ -1,10 +1,8 @@
 package com.ivanov.scc;
 
 import com.ivanov.scc.client.StarlingClient;
-import com.ivanov.scc.client.request.SavingGoalPutRequest;
 import com.ivanov.scc.client.response.Accounts;
 import com.ivanov.scc.client.response.PutMoneyResponse;
-import com.ivanov.scc.client.response.SavingGoalsResponse;
 import com.ivanov.scc.client.response.Transactions;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpNoOkResponse;
@@ -12,8 +10,6 @@ import com.ivanov.scc.exception.AccountsNotFoundException;
 import com.ivanov.scc.exception.TransactionsNotFoundException;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.model.Amount;
-import com.ivanov.scc.model.SavingGoal;
-import com.ivanov.scc.model.TotalSaved;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -103,35 +99,6 @@ public class StarlingClientTest {
     }
 
     @Test
-    void testGetSavingGoals(){
-        Account acc = new Account();
-        List<Account> accounts = new ArrayList<>();
-        accounts.add(acc);
-
-        Accounts accountResponse = new Accounts();
-        accountResponse.setAccounts(accounts);
-
-        SavingGoalsResponse savingGoalsResponse = new SavingGoalsResponse();
-        List<SavingGoal> savingGoals = new ArrayList<>();
-        SavingGoal sg = new SavingGoal();
-        TotalSaved ts = new TotalSaved();
-        ts.setCurrency("GBP");
-        ts.setMinorUnits(BigDecimal.valueOf(150000));
-        sg.setTotalSaved(ts);
-        savingGoals.add(sg);
-        savingGoalsResponse.setSavingGoal(savingGoals);
-
-        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(Accounts.class)))
-                .thenReturn(accountResponse);
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(SavingGoalsResponse.class)))
-                .thenReturn(savingGoalsResponse);
-        List<SavingGoalsResponse> savings = starlingClient.getAllSavingGoals();
-
-        assertEquals(BigDecimal.valueOf(150000),savings.get(0).getSavingGoal().get(0).getTotalSaved().getMinorUnits());
-    }
-
-
-    @Test
     void testPutMoneyInSavingGoal(){
         Amount amm = new Amount("GBP",BigDecimal.valueOf(50.5));
         PutMoneyResponse pmr = new PutMoneyResponse();
@@ -139,6 +106,6 @@ public class StarlingClientTest {
         lenient().when(httpClient.sendPutWithJsonResponse(any(),any(),eq(PutMoneyResponse.class)))
                 .thenReturn(pmr);
 
-        assertEquals(pmr, starlingClient.putMoneyToSavingGoal("test","test",amm));
+        assertEquals(pmr, starlingClient.putMoneyToSavingsGoal("test","test",amm));
     }
 }
