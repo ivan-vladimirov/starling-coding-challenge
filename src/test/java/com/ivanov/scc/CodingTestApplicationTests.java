@@ -1,13 +1,16 @@
-package com.ivanov.codingtest;
+package com.ivanov.scc;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class CodingTestApplicationTests {
 
 	@Test
 	void contextLoads() {
+
 	}
 
 }
