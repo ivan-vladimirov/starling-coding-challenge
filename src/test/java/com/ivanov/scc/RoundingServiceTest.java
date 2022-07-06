@@ -43,6 +43,7 @@ public class RoundingServiceTest {
         roundingService = new RoundingService(starlingClient);
         Account gbp = new Account();
         gbp.setCurrency("GBP");
+        gbp.setAccountUid("testing");
 
         Account eur = new Account();
         eur.setCurrency("EUR");
@@ -76,7 +77,7 @@ public class RoundingServiceTest {
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
 
-        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+        Amount gbp = roundingService.roundUpTransactionsForAllAccount().stream()
                 .filter(item -> item.getCurrency().equals("GBP"))
                 .findAny().orElse(null);
         assert gbp != null;
@@ -106,7 +107,7 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+        Amount gbp = roundingService.roundUpTransactionsForAllAccount().stream()
                 .filter(item -> item.getCurrency().equals("GBP"))
                 .findAny().orElse(null);
         assert gbp != null;
@@ -135,7 +136,7 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+        Amount gbp = roundingService.roundUpTransactionsForAllAccount().stream()
                 .filter(item -> item.getCurrency().equals("GBP"))
                 .findAny().orElse(null);
         assert gbp != null;
@@ -164,7 +165,7 @@ public class RoundingServiceTest {
 
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+        Amount gbp = roundingService.roundUpTransactionsForAllAccount().stream()
                 .filter(item -> item.getCurrency().equals("GBP"))
                 .findAny().orElse(null);
         assert gbp != null;
@@ -195,10 +196,11 @@ public class RoundingServiceTest {
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
 
-        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+        Amount gbp = roundingService.roundUpTransactionsForAllAccount().stream()
                 .filter(item -> item.getCurrency().equals("GBP"))
                 .findAny().orElse(null);
-        Amount eur = roundingService.roundUpTransactionsForAccount().stream()
+
+        Amount eur = roundingService.roundUpTransactionsForAllAccount().stream()
                 .filter(item -> item.getCurrency().equals("EUR"))
                 .findAny().orElse(null);
 
@@ -206,5 +208,30 @@ public class RoundingServiceTest {
         assertEquals(BigDecimal.valueOf(78), gbp.getMinorUnits());
         assert eur != null;
         assertEquals(BigDecimal.valueOf(80), eur.getMinorUnits());
+    }
+    @Test
+    void testRoundingForAccount(){
+        Transactions ts = new Transactions();
+
+        FeedItem fi1 = new FeedItem();
+        fi1.setDirection(Direction.OUT);
+        fi1.setAmount(new Amount("GBP", BigDecimal.valueOf(435)));
+
+
+        List<FeedItem> feedItems = new ArrayList<>();
+        feedItems.add(fi1);
+
+
+        ts.setFeedItems(feedItems);
+
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
+                .thenReturn(ts);
+        StarlingClient starlingClient = new StarlingClient(httpClient);
+        Account acc = starlingClient.getAccountForId("testing");
+        Amount gbp = roundingService.roundUpTransactionForAccount(acc.getAccountUid());
+
+        assert gbp != null;
+        assertEquals(BigDecimal.valueOf(65), gbp.getMinorUnits());
+
     }
 }

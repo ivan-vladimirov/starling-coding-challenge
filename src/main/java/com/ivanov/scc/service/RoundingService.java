@@ -3,6 +3,7 @@ package com.ivanov.scc.service;
 import com.ivanov.scc.client.StarlingClient;
 import com.ivanov.scc.client.response.Accounts;
 import com.ivanov.scc.client.response.Transactions;
+import com.ivanov.scc.exception.TransactionsNotFoundException;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.model.Direction;
@@ -29,13 +30,21 @@ public class RoundingService {
         this.client = client;
     }
 
-    public List<Amount> roundUpTransactionsForAccount() {
+    public List<Amount> roundUpTransactionsForAllAccount() {
         List<Amount> roundUps = new ArrayList<>();
         Accounts accounts = client.getAllAccounts();
         ZonedDateTime weekAgo = ZonedDateTime.parse(ZonedDateTime.now().minusDays(7).format(DateTimeFormatter.ISO_DATE_TIME));
         accounts.getAccounts().forEach( account -> roundUps.add(calculateRoundUps(account.getCurrency(), client.getTransactionsForAccount(account,weekAgo).getFeedItems())));
 
         return roundUps;
+    }
+    public Amount roundUpTransactionForAccount(String accountUid){
+        LOG.info("Rounding transactions for account with uid: {}", accountUid);
+        Account account = client.getAccountForId(accountUid);
+        ZonedDateTime weekAgo = ZonedDateTime.parse(ZonedDateTime.now().minusDays(7).format(DateTimeFormatter.ISO_DATE_TIME));
+        Transactions ts = client.getTransactionsForAccount(account,weekAgo);
+
+        return calculateRoundUps(account.getCurrency(),ts.getFeedItems());
     }
 
     public Amount calculateRoundUps(String currency, List<FeedItem> feedItems) {

@@ -2,7 +2,6 @@ package com.ivanov.scc.client.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.ivanov.scc.model.FeedItem;
 import com.ivanov.scc.model.SavingGoal;
 
 import java.util.List;

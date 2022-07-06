@@ -19,24 +19,4 @@ public class Accounts {
         public void setAccounts(List<Account> accounts) {
                 this.accounts = accounts;
         }
-
-        @Override
-        public boolean equals(Object o) {
-                if (this == o) return true;
-                if (o == null || getClass() != o.getClass()) return false;
-                Accounts that = (Accounts) o;
-                return Objects.equals(accounts, that.accounts);
-        }
-
-        @Override
-        public int hashCode() {
-                return Objects.hash(accounts);
-        }
-
-        @Override
-        public String toString() {
-                return "AccountResponse{" +
-                        "accounts=" + accounts +
-                        '}';
-        }
 }

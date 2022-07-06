@@ -1,13 +1,17 @@
 package com.ivanov.scc;
 
 import com.ivanov.scc.client.StarlingClient;
+import com.ivanov.scc.client.request.SavingGoalPutRequest;
 import com.ivanov.scc.client.response.Accounts;
+import com.ivanov.scc.client.response.PutMoneyResponse;
 import com.ivanov.scc.client.response.SavingGoalsResponse;
 import com.ivanov.scc.client.response.Transactions;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpNoOkResponse;
 import com.ivanov.scc.exception.AccountsNotFoundException;
+import com.ivanov.scc.exception.TransactionsNotFoundException;
 import com.ivanov.scc.model.Account;
+import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.model.SavingGoal;
 import com.ivanov.scc.model.TotalSaved;
 import org.apache.http.HttpStatus;
@@ -50,6 +54,25 @@ public class StarlingClientTest {
         AccountsNotFoundException e = assertThrows(AccountsNotFoundException.class, () -> starlingClient.getAllAccounts());
         assertEquals("Accounts not found for current user.", e.getMessage());
     }
+    @Test
+    void testGetTransactionsNotFound(){
+        Account eur = new Account();
+        eur.setCurrency("EUR");
+
+        List<Account> accounts = new ArrayList<>();
+        accounts.add(eur);
+
+        Accounts accountResponse = new Accounts();
+        accountResponse.setAccounts(accounts);
+        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(Accounts.class)))
+                .thenReturn(accountResponse);
+
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
+                .thenThrow(new HttpNoOkResponse("REQ", "RESP", HttpStatus.SC_NOT_FOUND));
+        TransactionsNotFoundException e = assertThrows(TransactionsNotFoundException.class,
+                () -> starlingClient.getAllTransactionsForAllAccounts(ZonedDateTime.now()));
+        assertEquals("Transactions not found for current user.", e.getMessage());
+    }
 
     @Test
     void testGetAllAccounts(){
@@ -78,6 +101,7 @@ public class StarlingClientTest {
 
         assertNotNull(transactions);
     }
+
     @Test
     void testGetSavingGoals(){
         Account acc = new Account();
@@ -104,5 +128,17 @@ public class StarlingClientTest {
         List<SavingGoalsResponse> savings = starlingClient.getAllSavingGoals();
 
         assertEquals(BigDecimal.valueOf(150000),savings.get(0).getSavingGoal().get(0).getTotalSaved().getMinorUnits());
+    }
+
+
+    @Test
+    void testPutMoneyInSavingGoal(){
+        Amount amm = new Amount("GBP",BigDecimal.valueOf(50.5));
+        PutMoneyResponse pmr = new PutMoneyResponse();
+
+        lenient().when(httpClient.sendPutWithJsonResponse(any(),any(),eq(PutMoneyResponse.class)))
+                .thenReturn(pmr);
+
+        assertEquals(pmr, starlingClient.putMoneyToSavingGoal("test","test",amm));
     }
 }

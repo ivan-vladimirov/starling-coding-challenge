@@ -1,11 +1,13 @@
 package com.ivanov.scc.client;
 
 import com.ivanov.scc.client.request.SavingGoalPutRequest;
+import com.ivanov.scc.client.response.PutMoneyResponse;
 import com.ivanov.scc.client.response.SavingGoalsResponse;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpCode;
 import com.ivanov.scc.config.HttpNoOkResponse;
 import com.ivanov.scc.exception.AccountsNotFoundException;
+import com.ivanov.scc.exception.TransactionsNotFoundException;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.client.response.Accounts;
 import com.ivanov.scc.client.response.Transactions;
@@ -84,20 +86,20 @@ public class StarlingClient {
         return savingGoalsResponses;
     }
 
-    public Object putMoneyToSavingGoal(String savingGoalUid, String accountUid, BigDecimal minor, String currency) {
-        Amount amount = new Amount(currency, minor);
+    public PutMoneyResponse putMoneyToSavingGoal(String savingGoalUid, String accountUid, Amount amount) {
+
         SavingGoalPutRequest savingGoalPutRequest = new SavingGoalPutRequest();
         savingGoalPutRequest.setAmount(amount);
-        LOG.info("" + savingGoalPutRequest);
+
         return httpClient.sendPutWithJsonResponse(String.format(PUT_SAVING_GOALS,
-                accountUid, savingGoalUid, UUID.randomUUID()), savingGoalPutRequest, Object.class);
+                accountUid, savingGoalUid, UUID.randomUUID()), savingGoalPutRequest, PutMoneyResponse.class);
     }
 
     public List<Transactions> getAllTransactionsForAllAccounts(ZonedDateTime fromDate){
         List<Account> accounts = getAllAccounts().getAccounts();
         List<Transactions>  transactionsAllAccounts = new ArrayList<>();
         if (accounts == null || accounts.isEmpty()) {
-            LOG.error("No accounts to retrieve transactions from.");
+            LOG.error("No account to retrieve transactions from.");
             return null;
         }
         accounts.forEach(account -> transactionsAllAccounts.add(getTransactionsForAccount(account, fromDate)));
@@ -114,7 +116,7 @@ public class StarlingClient {
                     Transactions.class);
         } catch (HttpNoOkResponse e) {
             if (e.getCode() == HttpCode.NOT_FOUND) {
-                throw new AccountsNotFoundException("Transactions not found for current user.");
+                throw new TransactionsNotFoundException("Transactions not found for current user.");
             }
             throw e;
         }
