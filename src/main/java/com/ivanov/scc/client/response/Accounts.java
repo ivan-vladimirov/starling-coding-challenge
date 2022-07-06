@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AccountResponse {
+public class Accounts {
         @JsonProperty("accounts")
         private List<Account> accounts;
 
@@ -24,7 +24,7 @@ public class AccountResponse {
         public boolean equals(Object o) {
                 if (this == o) return true;
                 if (o == null || getClass() != o.getClass()) return false;
-                AccountResponse that = (AccountResponse) o;
+                Accounts that = (Accounts) o;
                 return Objects.equals(accounts, that.accounts);
         }
 

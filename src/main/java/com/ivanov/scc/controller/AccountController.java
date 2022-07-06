@@ -1,9 +1,12 @@
 package com.ivanov.scc.controller;
 
-import com.ivanov.scc.client.response.AccountResponse;
+import com.ivanov.scc.client.response.Accounts;
 import com.ivanov.scc.client.StarlingClient;
 import com.ivanov.scc.client.response.SavingGoalsResponse;
-import com.ivanov.scc.client.response.TransactionsResponse;
+import com.ivanov.scc.client.response.Transactions;
+import com.ivanov.scc.exception.AccountsNotFoundException;
+import com.ivanov.scc.model.Account;
+import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.service.RoundingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,10 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/api/account")
+@RequestMapping("/api")
 public class AccountController {
     private final StarlingClient accountService;
     private final RoundingService roundingService;
@@ -26,21 +28,39 @@ public class AccountController {
     }
 
     @GetMapping("/accounts")
-    public AccountResponse getAllAccounts(){return accountService.getAllAccounts();}
-
-    @PutMapping("/savingGoal")
-    public void addMoneyToSavingGoal(String savingGoalUid, String accountUid){ accountService.addMoneyToSavingGoal(savingGoalUid,accountUid);}
-
+    public Accounts getAllAccounts(){return accountService.getAllAccounts();}
+    /*
+    Test endpoint that returns:
+    |-> All transactions per account for the last day (hence why Lost of TransactionResponse)
+     */
     @GetMapping("/transactions")
-    public List<TransactionsResponse> getTransactions(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate){
-        return accountService.getTransactions(fromDate);
+    public List<Transactions> getAllTransactions(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate){
+        return accountService.getAllTransactionsForAllAccounts(fromDate);
     }
+    @GetMapping("/transactions/byId")
+    public Transactions getTransactionsForAcount(@RequestParam String accountUid, @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate){
+        Account account = accountService.getAccountForId(accountUid);
+        if(account == null)
+            throw new AccountsNotFoundException("Account could not be found for id" + accountUid);
+
+        return accountService.getTransactionsForAccount(account, fromDate);
+    }
+    /*
+    Test endpoint that is returning:
+    |-> List of all the roundings per accounts for the last wek
+    The amount are in MinorUnit same as in StarlingAPI.
+     */
     @GetMapping("/roundUpWeek")
-    public List<Map<String, BigDecimal>> roundMeUp(){
-         return roundingService.roundUpTransactions();
+    public List<Amount> roundMeUp(){
+         return roundingService.roundUpTransactionsForAccount();
     }
     @GetMapping("/getSavingGoals")
     public List<SavingGoalsResponse> getAllSavingGoals(){
         return accountService.getAllSavingGoals();
+    }
+    @PutMapping("/putMoneyInSavingGoal")
+    public Object putMoneyInSavingGoal(@RequestParam String savingGoalUid, @RequestParam String accountUid,
+                                     @RequestParam BigDecimal minor, @RequestParam String currency){
+        return accountService.putMoneyToSavingGoal(savingGoalUid, accountUid, minor, currency);
     }
 }

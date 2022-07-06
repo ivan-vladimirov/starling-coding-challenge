@@ -1,11 +1,15 @@
 package com.ivanov.scc.config;
 
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -24,6 +28,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.HttpClientUtils;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -162,12 +167,27 @@ public class HttpClient {
 
                 postRequest.setHeader("Content-Type", "application/json");
 
+                ObjectMapper mapper = new ObjectMapper();
+
+                try {
+                    // convert user object to json string and return it
+                    StringEntity params = new StringEntity(mapper.writeValueAsString(body));
+                    postRequest.setEntity(params);
+                }
+                catch (JsonGenerationException | JsonMappingException e) {
+                    // catch various errors
+                    e.printStackTrace();
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+
                 ConcurrentMap var10003 = this.writerCache;
                 Class var10004 = body.getClass();
                 ObjectMapper var10005 = this.objectMapper;
                 Objects.requireNonNull(var10005);
-//                    postRequest.setEntity(new ByteArrayEntity(((ObjectWriter)var10003.computeIfAbsent(var10004,
-//                            var10005::writerFor)).writeValueAsBytes(body)));
+                //postRequest.setEntity(new ByteArrayEntity(((ObjectWriter)var10003.computeIfAbsent(var10004, var10005::writerFor)).writeValueAsBytes(body)));
             }
         }
 

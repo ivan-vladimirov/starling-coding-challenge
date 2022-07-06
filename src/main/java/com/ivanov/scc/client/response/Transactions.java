@@ -7,7 +7,7 @@ import com.ivanov.scc.model.FeedItem;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class TransactionsResponse {
+public class Transactions {
     @JsonProperty("feedItems")
     private List<FeedItem> feedItems;
 

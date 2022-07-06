@@ -1,8 +1,8 @@
 package com.ivanov.scc;
 
 import com.ivanov.scc.client.StarlingClient;
-import com.ivanov.scc.client.response.AccountResponse;
-import com.ivanov.scc.client.response.TransactionsResponse;
+import com.ivanov.scc.client.response.Accounts;
+import com.ivanov.scc.client.response.Transactions;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.model.Amount;
@@ -16,7 +16,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -25,7 +24,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 
@@ -43,21 +41,25 @@ public class RoundingServiceTest {
     void setup(){
         StarlingClient starlingClient = new StarlingClient(httpClient);
         roundingService = new RoundingService(starlingClient);
-        Account acc = new Account();
+        Account gbp = new Account();
+        gbp.setCurrency("GBP");
+
+        Account eur = new Account();
+        eur.setCurrency("EUR");
+
         List<Account> accounts = new ArrayList<>();
-        accounts.add(acc);
+        accounts.add(gbp);
+        accounts.add(eur);
 
-        AccountResponse accountResponse = new AccountResponse();
+        Accounts accountResponse = new Accounts();
         accountResponse.setAccounts(accounts);
-        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(AccountResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(Accounts.class)))
                 .thenReturn(accountResponse);
-
     }
 
     @Test
     void testRoundingForTransactions(){
-        TransactionsResponse ts = new TransactionsResponse();
-
+        Transactions ts = new Transactions();
         FeedItem fi1 = new FeedItem();
         fi1.setDirection(Direction.OUT);
         fi1.setAmount(new Amount("GBP", BigDecimal.valueOf(550)));
@@ -71,14 +73,19 @@ public class RoundingServiceTest {
 
         ts.setFeedItems(feedItems);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(0.65), roundingService.roundUpTransactions().get(0).get("GBP"));
+
+        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+                .filter(item -> item.getCurrency().equals("GBP"))
+                .findAny().orElse(null);
+        assert gbp != null;
+        assertEquals(BigDecimal.valueOf(65), gbp.getMinorUnits());
     }
 
     @Test
     void testRoundingForTransactionsWithEvenTransactions(){
-        TransactionsResponse ts = new TransactionsResponse();
+        Transactions ts = new Transactions();
 
         FeedItem fi1 = new FeedItem();
         fi1.setDirection(Direction.OUT);
@@ -97,13 +104,17 @@ public class RoundingServiceTest {
 
         ts.setFeedItems(feedItems);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(1.67), roundingService.roundUpTransactions().get(0).get("GBP"));
+        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+                .filter(item -> item.getCurrency().equals("GBP"))
+                .findAny().orElse(null);
+        assert gbp != null;
+        assertEquals(BigDecimal.valueOf(167), gbp.getMinorUnits());
     }
     @Test
     void testRoundingForTransactionsWithAllInDirection(){
-        TransactionsResponse ts = new TransactionsResponse();
+        Transactions ts = new Transactions();
 
         FeedItem fi1 = new FeedItem();
         fi1.setDirection(Direction.IN);
@@ -122,13 +133,17 @@ public class RoundingServiceTest {
 
         ts.setFeedItems(feedItems);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        assertNull(roundingService.roundUpTransactions().get(0).get("GBP"));
+        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+                .filter(item -> item.getCurrency().equals("GBP"))
+                .findAny().orElse(null);
+        assert gbp != null;
+        assertEquals(BigDecimal.ZERO, gbp.getMinorUnits());
     }
     @Test
     void testRoundingWithTranasctionsProvidedByStarling(){
-        TransactionsResponse ts = new TransactionsResponse();
+        Transactions ts = new Transactions();
 
         FeedItem fi1 = new FeedItem();
         fi1.setDirection(Direction.OUT);
@@ -147,14 +162,18 @@ public class RoundingServiceTest {
 
         ts.setFeedItems(feedItems);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(1.58), roundingService.roundUpTransactions().get(0).get("GBP"));
+        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+                .filter(item -> item.getCurrency().equals("GBP"))
+                .findAny().orElse(null);
+        assert gbp != null;
+        assertEquals(BigDecimal.valueOf(158), gbp.getMinorUnits());
     }
 
     @Test
     void testRoundingWithDifferentCurrencies(){
-        TransactionsResponse ts = new TransactionsResponse();
+        Transactions ts = new Transactions();
 
         FeedItem fi1 = new FeedItem();
         fi1.setDirection(Direction.OUT);
@@ -173,9 +192,19 @@ public class RoundingServiceTest {
 
         ts.setFeedItems(feedItems);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
                 .thenReturn(ts);
-        assertEquals(BigDecimal.valueOf(0.78), roundingService.roundUpTransactions().get(0).get("GBP"));
-        assertEquals(BigDecimal.valueOf(0.80), roundingService.roundUpTransactions().get(0).get("EUR"));
+
+        Amount gbp = roundingService.roundUpTransactionsForAccount().stream()
+                .filter(item -> item.getCurrency().equals("GBP"))
+                .findAny().orElse(null);
+        Amount eur = roundingService.roundUpTransactionsForAccount().stream()
+                .filter(item -> item.getCurrency().equals("EUR"))
+                .findAny().orElse(null);
+
+        assert gbp != null;
+        assertEquals(BigDecimal.valueOf(78), gbp.getMinorUnits());
+        assert eur != null;
+        assertEquals(BigDecimal.valueOf(80), eur.getMinorUnits());
     }
 }

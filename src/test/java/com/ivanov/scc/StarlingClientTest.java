@@ -1,9 +1,9 @@
 package com.ivanov.scc;
 
 import com.ivanov.scc.client.StarlingClient;
-import com.ivanov.scc.client.response.AccountResponse;
+import com.ivanov.scc.client.response.Accounts;
 import com.ivanov.scc.client.response.SavingGoalsResponse;
-import com.ivanov.scc.client.response.TransactionsResponse;
+import com.ivanov.scc.client.response.Transactions;
 import com.ivanov.scc.config.HttpClient;
 import com.ivanov.scc.config.HttpNoOkResponse;
 import com.ivanov.scc.exception.AccountsNotFoundException;
@@ -45,7 +45,7 @@ public class StarlingClientTest {
 
     @Test
     void testGetAccountsNotFound(){
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(AccountResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Accounts.class)))
                 .thenThrow(new HttpNoOkResponse("REQ", "RESP", HttpStatus.SC_NOT_FOUND));
         AccountsNotFoundException e = assertThrows(AccountsNotFoundException.class, () -> starlingClient.getAllAccounts());
         assertEquals("Accounts not found for current user.", e.getMessage());
@@ -53,9 +53,9 @@ public class StarlingClientTest {
 
     @Test
     void testGetAllAccounts(){
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(AccountResponse.class)))
-                .thenReturn(new AccountResponse());
-        AccountResponse accounts = starlingClient.getAllAccounts();
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Accounts.class)))
+                .thenReturn(new Accounts());
+        Accounts accounts = starlingClient.getAllAccounts();
 
         assertNotNull(accounts);
     }
@@ -66,15 +66,15 @@ public class StarlingClientTest {
         List<Account> accounts = new ArrayList<>();
         accounts.add(acc);
 
-        AccountResponse accountResponse = new AccountResponse();
+        Accounts accountResponse = new Accounts();
         accountResponse.setAccounts(accounts);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(AccountResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(Accounts.class)))
                 .thenReturn(accountResponse);
-        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(TransactionsResponse.class)))
-                .thenReturn(new TransactionsResponse());
+        lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(Transactions.class)))
+                .thenReturn(new Transactions());
         ZonedDateTime lt = ZonedDateTime.now();
-        List<TransactionsResponse> transactions = starlingClient.getTransactions(lt);
+        List<Transactions> transactions = starlingClient.getAllTransactionsForAllAccounts(lt);
 
         assertNotNull(transactions);
     }
@@ -84,7 +84,7 @@ public class StarlingClientTest {
         List<Account> accounts = new ArrayList<>();
         accounts.add(acc);
 
-        AccountResponse accountResponse = new AccountResponse();
+        Accounts accountResponse = new Accounts();
         accountResponse.setAccounts(accounts);
 
         SavingGoalsResponse savingGoalsResponse = new SavingGoalsResponse();
@@ -97,7 +97,7 @@ public class StarlingClientTest {
         savingGoals.add(sg);
         savingGoalsResponse.setSavingGoal(savingGoals);
 
-        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(AccountResponse.class)))
+        lenient().when(httpClient.sendGetWithJsonResponse(eq("/api/v2/accounts"), eq(Accounts.class)))
                 .thenReturn(accountResponse);
         lenient().when(httpClient.sendGetWithJsonResponse(uriCaptor.capture(), eq(SavingGoalsResponse.class)))
                 .thenReturn(savingGoalsResponse);
