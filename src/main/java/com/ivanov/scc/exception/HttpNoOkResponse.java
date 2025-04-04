@@ -1,5 +1,7 @@
-package com.ivanov.scc.config;
+package com.ivanov.scc.exception;
 
+
+import com.ivanov.scc.common.HttpCode;
 
 public class HttpNoOkResponse extends RuntimeException {
     private final String request;

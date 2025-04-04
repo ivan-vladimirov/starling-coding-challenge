@@ -1,4 +1,4 @@
-package com.ivanov.scc.config;
+package com.ivanov.scc.client;
 
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -17,6 +17,9 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+
+import com.ivanov.scc.exception.HttpNoOkResponse;
+import com.ivanov.scc.exception.HttpRequestFailed;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -28,7 +31,6 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.HttpClientUtils;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -39,14 +41,6 @@ import org.slf4j.LoggerFactory;
 
 public class HttpClient {
     private static final Logger LOG = LoggerFactory.getLogger(HttpClient.class);
-    private static final int DEFAULT_CONNECTION_TTL_SECONDS = 59;
-    private static final int DEFAULT_REQUEST_TIMEOUT_SECONDS = 180;
-    private static final int DEFAULT_NUMBER_OF_CONNECTIONS = 1;
-    private static final int DEFAULT_RETRY_COUNT = 0;
-    private final TypeReference<String> STRING_TYPE = new TypeReference<String>() {
-    };
-    private final TypeReference<byte[]> BYTES_TYPE = new TypeReference<byte[]>() {
-    };
     private final CloseableHttpClient httpClient;
     private final String name;
     private final String rootUrl;
@@ -88,14 +82,6 @@ public class HttpClient {
         return this.processResponse(this.prepareHttpRequest(new HttpGet(), uriPath), responseType);
     }
 
-    public <T> T sendPostWithJsonResponse(String uriPath, Object body, final Class<T> responseType) {
-        return this.sendPostWithJsonResponse(uriPath, body, new TypeReference<T>() {
-            public Type getType() {
-                return responseType;
-            }
-        });
-    }
-
     public <T> T sendPostWithJsonResponse(String uriPath, Object body, TypeReference<T> responseType) {
         this.validateJsonSupport();
         return this.processResponse(this.processHttpRequestBody((HttpPost)this.prepareHttpRequest(new HttpPost(), uriPath), body), responseType);
@@ -112,30 +98,6 @@ public class HttpClient {
     public <T> T sendPutWithJsonResponse(String uriPath, Object body, TypeReference<T> responseType) {
         this.validateJsonSupport();
         return this.processResponse(this.processHttpRequestBody((HttpPut)this.prepareHttpRequest(new HttpPut(), uriPath), body), responseType);
-    }
-
-    public String sendGet(String uriPath) {
-        return (String)this.processResponse(this.prepareHttpRequest(new HttpGet(), uriPath), this.STRING_TYPE);
-    }
-
-    public byte[] sendGetWithBinaryResponse(String uriPath) {
-        return (byte[])this.processResponse(this.prepareHttpRequest(new HttpGet(), uriPath), this.BYTES_TYPE);
-    }
-
-    public String sendPost(String uriPath, Object body) {
-        return (String)this.processResponse(this.processHttpRequestBody((HttpPost)this.prepareHttpRequest(new HttpPost(), uriPath), body), this.STRING_TYPE);
-    }
-
-    public byte[] sendPostWithBinaryResponse(String uriPath, Object body) {
-        return (byte[])this.processResponse(this.processHttpRequestBody((HttpPost)this.prepareHttpRequest(new HttpPost(), uriPath), body), this.BYTES_TYPE);
-    }
-
-    public String sendPut(String uriPath, Object body) {
-        return (String)this.processResponse(this.processHttpRequestBody((HttpPut)this.prepareHttpRequest(new HttpPut(), uriPath), body), this.STRING_TYPE);
-    }
-
-    public byte[] sendPutWithBinaryResponse(String uriPath, Object body) {
-        return (byte[])this.processResponse(this.processHttpRequestBody((HttpPut)this.prepareHttpRequest(new HttpPut(), uriPath), body), this.BYTES_TYPE);
     }
 
     private void validateJsonSupport() {
@@ -187,7 +149,6 @@ public class HttpClient {
                 Class var10004 = body.getClass();
                 ObjectMapper var10005 = this.objectMapper;
                 Objects.requireNonNull(var10005);
-                //postRequest.setEntity(new ByteArrayEntity(((ObjectWriter)var10003.computeIfAbsent(var10004, var10005::writerFor)).writeValueAsBytes(body)));
             }
         }
 

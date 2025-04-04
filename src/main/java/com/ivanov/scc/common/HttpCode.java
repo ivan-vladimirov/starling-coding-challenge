@@ -1,4 +1,4 @@
-package com.ivanov.scc.config;
+package com.ivanov.scc.common;
 
 import java.util.Arrays;
 
