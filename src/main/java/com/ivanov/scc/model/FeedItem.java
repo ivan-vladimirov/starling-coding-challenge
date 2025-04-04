@@ -2,6 +2,7 @@ package com.ivanov.scc.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ivanov.scc.common.Direction;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FeedItem {

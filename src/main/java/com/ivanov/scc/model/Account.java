@@ -1,5 +1,7 @@
 package com.ivanov.scc.model;
 
+import com.ivanov.scc.common.AccountType;
+
 import java.time.LocalDate;
 import java.util.Objects;
 

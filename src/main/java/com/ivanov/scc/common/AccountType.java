@@ -1,4 +1,4 @@
-package com.ivanov.scc.model;
+package com.ivanov.scc.common;
 
 public enum AccountType {
     PRIMARY,
