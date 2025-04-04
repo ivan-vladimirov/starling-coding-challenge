@@ -1,4 +1,4 @@
-package com.ivanov.scc.service;
+package com.ivanov.scc.service.logic;
 
 import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.model.FeedItem;

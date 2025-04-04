@@ -1,6 +1,6 @@
 package com.ivanov.scc.controller;
 
-import com.ivanov.scc.client.response.Accounts;
+import com.ivanov.scc.api.dto.Accounts;
 import com.ivanov.scc.exception.AccountsNotFoundException;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.service.AccountService;

@@ -1,7 +1,7 @@
 package com.ivanov.scc.service.impl;
 
-import com.ivanov.scc.client.StarlingApiClient;
-import com.ivanov.scc.client.response.Transactions;
+import com.ivanov.scc.api.StarlingApiClient;
+import com.ivanov.scc.api.dto.Transactions;
 import com.ivanov.scc.common.HttpCode;
 import com.ivanov.scc.exception.HttpNoOkResponse;
 import com.ivanov.scc.exception.TransactionsNotFoundException;

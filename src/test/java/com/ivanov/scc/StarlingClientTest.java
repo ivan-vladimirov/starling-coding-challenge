@@ -1,10 +1,10 @@
 package com.ivanov.scc;
 
-import com.ivanov.scc.client.StarlingClient;
-import com.ivanov.scc.client.response.Accounts;
-import com.ivanov.scc.client.response.PutMoneyResponse;
-import com.ivanov.scc.client.response.Transactions;
-import com.ivanov.scc.client.HttpClient;
+import com.ivanov.scc.api.StarlingClient;
+import com.ivanov.scc.api.dto.Accounts;
+import com.ivanov.scc.api.dto.PutMoneyResponse;
+import com.ivanov.scc.api.dto.Transactions;
+import com.ivanov.scc.api.HttpClient;
 import com.ivanov.scc.exception.HttpNoOkResponse;
 import com.ivanov.scc.exception.AccountsNotFoundException;
 import com.ivanov.scc.exception.TransactionsNotFoundException;

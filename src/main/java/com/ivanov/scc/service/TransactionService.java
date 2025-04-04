@@ -1,7 +1,7 @@
 package com.ivanov.scc.service;
 
 
-import com.ivanov.scc.client.response.Transactions;
+import com.ivanov.scc.api.dto.Transactions;
 import com.ivanov.scc.model.Account;
 
 import java.time.ZonedDateTime;

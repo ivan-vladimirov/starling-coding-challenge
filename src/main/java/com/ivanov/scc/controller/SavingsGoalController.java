@@ -1,6 +1,6 @@
 package com.ivanov.scc.controller;
 
-import com.ivanov.scc.client.response.PutMoneyResponse;
+import com.ivanov.scc.api.dto.PutMoneyResponse;
 import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.service.SavingsGoalService;
 import com.ivanov.scc.service.impl.StarlingRoundingService;
