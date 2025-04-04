@@ -1,4 +1,4 @@
-package com.ivanov.scc.client;
+package com.ivanov.scc.api;
 
 
 import com.fasterxml.jackson.core.JsonGenerationException;

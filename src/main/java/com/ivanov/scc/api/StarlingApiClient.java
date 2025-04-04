@@ -1,4 +1,4 @@
-package com.ivanov.scc.client;
+package com.ivanov.scc.api;
 
 import com.ivanov.scc.exception.HttpNoOkResponse;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,11 +1,10 @@
-package com.ivanov.scc.client.response;
+package com.ivanov.scc.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ivanov.scc.model.Account;
 
 import java.util.List;
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Accounts {

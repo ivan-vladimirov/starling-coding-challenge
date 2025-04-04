@@ -1,8 +1,8 @@
 package com.ivanov.scc.service.impl;
 
-import com.ivanov.scc.client.StarlingApiClient;
-import com.ivanov.scc.client.request.SavingGoalPutRequest;
-import com.ivanov.scc.client.response.PutMoneyResponse;
+import com.ivanov.scc.api.StarlingApiClient;
+import com.ivanov.scc.api.dto.SavingGoalPutRequest;
+import com.ivanov.scc.api.dto.PutMoneyResponse;
 import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.service.SavingsGoalService;
 import org.springframework.beans.factory.annotation.Autowired;

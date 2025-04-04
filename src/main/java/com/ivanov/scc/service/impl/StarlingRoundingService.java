@@ -1,11 +1,11 @@
 package com.ivanov.scc.service.impl;
 
-import com.ivanov.scc.client.response.Transactions;
+import com.ivanov.scc.api.dto.Transactions;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.model.FeedItem;
 import com.ivanov.scc.service.AccountService;
-import com.ivanov.scc.service.RoundingCalculator;
+import com.ivanov.scc.service.logic.RoundingCalculator;
 import com.ivanov.scc.service.RoundingService;
 import com.ivanov.scc.service.TransactionService;
 import org.slf4j.Logger;

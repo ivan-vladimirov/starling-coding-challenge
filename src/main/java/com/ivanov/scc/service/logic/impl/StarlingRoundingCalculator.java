@@ -1,9 +1,9 @@
-package com.ivanov.scc.service.impl;
+package com.ivanov.scc.service.logic.impl;
 
 import com.ivanov.scc.common.Direction;
 import com.ivanov.scc.model.Amount;
 import com.ivanov.scc.model.FeedItem;
-import com.ivanov.scc.service.RoundingCalculator;
+import com.ivanov.scc.service.logic.RoundingCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

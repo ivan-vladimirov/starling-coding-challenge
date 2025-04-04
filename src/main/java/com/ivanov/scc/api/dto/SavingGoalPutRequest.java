@@ -1,4 +1,4 @@
-package com.ivanov.scc.client.request;
+package com.ivanov.scc.api.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.ivanov.scc.model.Amount;

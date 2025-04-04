@@ -1,7 +1,7 @@
 package com.ivanov.scc.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ivanov.scc.client.HttpClient;
+import com.ivanov.scc.api.HttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

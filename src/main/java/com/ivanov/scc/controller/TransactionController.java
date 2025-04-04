@@ -1,6 +1,6 @@
 package com.ivanov.scc.controller;
 
-import com.ivanov.scc.client.response.Transactions;
+import com.ivanov.scc.api.dto.Transactions;
 import com.ivanov.scc.exception.AccountsNotFoundException;
 import com.ivanov.scc.model.Account;
 import com.ivanov.scc.service.AccountService;
@@ -31,23 +31,15 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<?> getAllTransactions(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate) {
-
-        if (fromDate == null) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("Missing required parameter: fromDate. Example : 2020-01-01T12:34:56.000Z");
-        }
-
+            @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate) {
         List<Transactions> transactions = transactionService.getAllTransactionsForAllAccounts(fromDate);
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/byId")
     public Transactions getTransactionsForAccount(
-            @RequestParam String accountUid,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate) {
-
+            @RequestParam(required = true) String accountUid,
+            @RequestParam(required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) ZonedDateTime fromDate) {
         Account account = accountService.getAccountForId(accountUid);
         if (account == null)
             throw new AccountsNotFoundException("Account could not be found for id " + accountUid);
